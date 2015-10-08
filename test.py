@@ -6,14 +6,17 @@ import trojan
 
 MODULE_TEXT = '''import sys
 import subprocess
-for l in sys.stdin.readline():
-    subprocess.call(l, shell=True)
+while True:
+    cmd = sys.stdin.readline()
+    if not cmd:
+        break
+    subprocess.call(cmd, shell=True)
 '''
 
 
 @click.command()
 @click.argument('host')
-def main(host):
+def shell(host):
     p = trojan.run(host, MODULE_TEXT, clean=True)
     handles = [
         sys.stdin.fileno(),
@@ -28,8 +31,10 @@ def main(host):
                 break
             p.stdin.write(cmd)
         if p.stdout.fileno() in rd:
-            sys.stdout.write(p.stdout.read(1000))
+            sys.stdout.write(p.stdout.readline())
+            sys.stdout.flush()
         if p.stderr.fileno() in rd:
-            sys.stderr.write(p.stderr.read(1000))
+            sys.stderr.write(p.stderr.readline())
+            sys.stderr.flush()
 
-main()
+shell()

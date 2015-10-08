@@ -2,7 +2,8 @@ import os
 from subprocess import Popen, PIPE
 
 
-bash_code = '''[ -e {filepath} ] || {{
+bash_code = '''
+[ -e {filepath} ] || {{
     # be sure that target dir exists
     mkdir -p "`dirname {filepath}`"
     [ -d "`dirname {filepath}`" ] || {{
@@ -27,6 +28,7 @@ bash_code = '''[ -e {filepath} ] || {{
     }}
     echo 'GET'
 
+    IFS=''
     # skip echo start
     read LINE
 
