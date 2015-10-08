@@ -17,7 +17,13 @@ while True:
 @click.command()
 @click.argument('host')
 def shell(host):
-    p = trojan.run(host, MODULE_TEXT, clean=True)
+    p = trojan.run(
+        host,
+        MODULE_TEXT,
+        target_path="~/.trojan/shell.py",
+        clean=True
+    )
+
     handles = [
         sys.stdin.fileno(),
         p.stdout.fileno(),
