@@ -1,5 +1,6 @@
 import os
-from subprocess import Popen, PIPE
+from .connection import connect
+
 
 REMOTE_PYTHON = os.environ.get('PYTHON_TROJAN_REMOTE', 'python')
 BASH_CMD = 'exec {remote} -u $({remote} -u -c "{stage1_text}") clean' + os.linesep
@@ -21,15 +22,7 @@ def run(target_host, payload, name=None, clean=False):
     """Run provided payload on remote host returning communication
     channel to it.
     """
-    p = Popen(
-        SSH_CMD.format(target_host=target_host),
-        shell=True,
-        bufsize=0,
-        stdin=PIPE,
-        stdout=PIPE,
-        stderr=PIPE,
-        close_fds=True
-    )
+    p = connect(target_host)
     stdin = LineWriter(p.stdin)
 
     # locate and read stage1

@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='trojan',
-    version='0.1',
+    version='0.2',
     description='Small helper library to bootstrap remote python',
     author='Anton Patrushev',
     author_email='apatrushev@gmail.com',
@@ -12,5 +12,13 @@ setup(
     packages=[
         'trojan',
         'trojan.stages'
-    ]
+    ],
+    install_requires=[
+        'click'
+    ],
+    extras_require={
+        'paramiko':  [
+            'paramiko'
+        ]
+    }
 )
