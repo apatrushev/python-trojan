@@ -1,5 +1,6 @@
 import sys
 import os
+import stat
 
 
 def reader():
@@ -29,7 +30,7 @@ def main():
             ns = {
                 '__name__': '__main__'
             }
-            exec code in ns, ns
+            exec(code, ns, ns)
             break
 
         # clean up traces
@@ -42,10 +43,10 @@ def main():
                 module_dir = os.path.dirname(__file__)
                 module_path = os.path.join(module_dir, arg)
                 with open(module_path, 'w') as dest:
-                    dest.write('#!/usr/bin/python' + os.linesep)
+                    dest.write('#!{} -u'.format(sys.executable) + os.linesep)
                     with open(__file__) as src:
                         dest.write(src.read())
-                os.chmod(module_path, 0755)
+                os.chmod(module_path, stat.S_IRWXU)
                 os.remove(__file__)
                 os.execl(module_path, module_path)
 

@@ -1,8 +1,8 @@
 import os
 from subprocess import Popen, PIPE
 
-
-BASH_CMD = 'exec python -u $(python -u -c "{stage1_text}") clean' + os.linesep
+REMOTE_PYTHON = os.environ.get('PYTHON_TROJAN_REMOTE', 'python')
+BASH_CMD = 'exec {remote} -u $({remote} -u -c "{stage1_text}") clean' + os.linesep
 SSH_CMD = "ssh {target_host} 'bash -'"
 STAGES_DIR = os.path.join(os.path.dirname(__file__), 'stages')
 STAGE1_PATH = os.path.join(STAGES_DIR, 'stage1.py')
@@ -28,7 +28,11 @@ def run(target_host, payload, name=None, clean=False):
         stage1_text = stage1_file.read()
 
     # start stage1 with bash
-    p.stdin.write(BASH_CMD.format(stage1_text=stage1_text))
+    command = BASH_CMD.format(
+        remote=REMOTE_PYTHON,
+        stage1_text=stage1_text
+    )
+    p.stdin.write(command)
 
     # push stage2 to remote
     with open(STAGE2_PATH) as stage2_file:
