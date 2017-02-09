@@ -9,6 +9,14 @@ STAGE1_PATH = os.path.join(STAGES_DIR, 'stage1.py')
 STAGE2_PATH = os.path.join(STAGES_DIR, 'stage2.py')
 
 
+class LineWriter(object):
+    def __init__(self, target):
+        self.target = target
+
+    def write(self, line):
+        self.target.write((line + os.linesep).encode())
+
+
 def run(target_host, payload, name=None, clean=False):
     """Run provided payload on remote host returning communication
     channel to it.
@@ -22,6 +30,7 @@ def run(target_host, payload, name=None, clean=False):
         stderr=PIPE,
         close_fds=True
     )
+    stdin = LineWriter(p.stdin)
 
     # locate and read stage1
     with open(STAGE1_PATH) as stage1_file:
@@ -32,28 +41,29 @@ def run(target_host, payload, name=None, clean=False):
         remote=REMOTE_PYTHON,
         stage1_text=stage1_text
     )
-    p.stdin.write(command)
+    stdin.write(command)
 
     # push stage2 to remote
     with open(STAGE2_PATH) as stage2_file:
         stage2_text = stage2_file.read()
-    p.stdin.write(stage2_text + os.linesep)
-    p.stdin.write('EOF' + os.linesep)
+    stdin.write(stage2_text)
+    stdin.write('EOF')
 
-    if p.stdout.readline().strip() != 'STAGE2':
-        raise RuntimeError('stage2 startup failed')
+    line = p.stdout.readline()
+    if line.strip() != 'STAGE2'.encode():
+        raise RuntimeError('stage2 startup failed {}'.format(line))
 
     # rename remote process
     if name is not None:
-        p.stdin.write('NAME:{}'.format(name) + os.linesep)
+        stdin.write('NAME:{}'.format(name))
         line = p.stdout.readline()
-        if line.strip() != 'STAGE2':
+        if line.strip() != 'STAGE2'.encode():
             raise RuntimeError('stage2 startup failed: {}'.format(line))
-    p.stdin.write('CLEAN' + os.linesep)
+    stdin.write('CLEAN')
 
     # start payload on remote host
-    p.stdin.write('PUT' + os.linesep)
-    p.stdin.write(payload + os.linesep)
-    p.stdin.write('EOF' + os.linesep)
+    stdin.write('PUT')
+    stdin.write(payload)
+    stdin.write('EOF')
 
     return p

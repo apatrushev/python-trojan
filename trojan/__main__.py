@@ -12,7 +12,7 @@ def main(host, module):
 
     p = trojan.run(
         host,
-        module_text,
+        module_text.decode(),
         name=module.name,
         clean=True
     )
@@ -28,11 +28,11 @@ def main(host, module):
             cmd = sys.stdin.readline()
             if len(cmd) == 0:
                 break
-            p.stdin.write(cmd)
+            p.stdin.write(cmd.encode())
         if p.stdout.fileno() in rd:
             line = p.stdout.readline()
             if line:
-                sys.stdout.write(line)
+                sys.stdout.write(line.decode())
                 sys.stdout.flush()
             else:
                 handles.remove(p.stdout.fileno())
