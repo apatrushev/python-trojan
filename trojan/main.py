@@ -40,9 +40,15 @@ def run(target_host, payload, name=None, clean=False):
     p.stdin.write(stage2_text + os.linesep)
     p.stdin.write('EOF' + os.linesep)
 
+    if p.stdout.readline().strip() != 'STAGE2':
+        raise RuntimeError('stage2 startup failed')
+
     # rename remote process
     if name is not None:
         p.stdin.write('NAME:{}'.format(name) + os.linesep)
+        line = p.stdout.readline()
+        if line.strip() != 'STAGE2':
+            raise RuntimeError('stage2 startup failed: {}'.format(line))
     p.stdin.write('CLEAN' + os.linesep)
 
     # start payload on remote host

@@ -10,6 +10,7 @@ def reader():
 
 def main():
     """Base function to boostrap payload."""
+    sys.stdout.write('STAGE2' + os.linesep)
     while True:
         # read command's from remote
         cmd = sys.stdin.readline()
@@ -49,6 +50,9 @@ def main():
                 os.chmod(module_path, stat.S_IRWXU)
                 os.remove(__file__)
                 os.execl(module_path, module_path)
+            else:
+                # repeat stage2 message in any case
+                sys.stdout.write('STAGE2' + os.linesep)
 
 
 if __name__ == '__main__':
